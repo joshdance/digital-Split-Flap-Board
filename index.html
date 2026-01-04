@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Split-Flap Board</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .input-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        input[type="text"] {
+            padding: 15px 20px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            width: 400px;
+            max-width: 100%;
+            margin-right: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        input[type="number"] {
+            padding: 10px 15px;
+            font-size: 16px;
+            border: none;
+            border-radius: 10px;
+            width: 100px;
+            margin-left: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        label {
+            color: white;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            background: #ff6b35;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            background: #ff8555;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .board {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            min-height: 200px;
+        }
+
+        .flap-container {
+            position: relative;
+            perspective: 1000px;
+        }
+
+        .flap {
+            width: 80px;
+            height: 120px;
+            background: #2c2c2c;
+            border-radius: 8px;
+            box-shadow:
+                inset 0 2px 4px rgba(255, 255, 255, 0.1),
+                0 8px 16px rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .flap::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10;
+        }
+
+        .flap img {
+            width: 70%;
+            height: auto;
+            transition: transform 0.3s ease;
+            position: relative;
+            z-index: 5;
+        }
+
+        .flap.flipping img {
+            animation: flip 0.3s ease-in-out;
+        }
+
+        @keyframes flip {
+            0% {
+                transform: rotateX(0deg);
+                opacity: 1;
+            }
+            50% {
+                transform: rotateX(90deg);
+                opacity: 0.3;
+            }
+            100% {
+                transform: rotateX(0deg);
+                opacity: 1;
+            }
+        }
+
+        .presets {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .presets button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 14px;
+            background: #4a90e2;
+        }
+
+        .presets button:hover {
+            background: #6aa8f2;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            input[type="text"] {
+                width: 100%;
+                margin-bottom: 10px;
+                margin-right: 0;
+            }
+
+            .flap {
+                width: 60px;
+                height: 90px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Digital Split-Flap Board</h1>
+
+        <div class="input-section">
+            <input type="text" id="messageInput" placeholder="Enter your message..." maxlength="100">
+            <button onclick="displayMessage()">Display</button>
+            <br><br>
+            <label for="flapCount">Number of flaps:</label>
+            <input type="number" id="flapCount" min="10" max="100" value="40">
+            <button onclick="initializeBoard()">Update</button>
+        </div>
+
+        <div class="board" id="board"></div>
+
+        <div class="presets">
+            <button onclick="setPreset('WELCOME')">Welcome</button>
+            <button onclick="setPreset('HELLO WORLD')">Hello World</button>
+            <button onclick="setPreset('BOARDING NOW')">Boarding Now</button>
+            <button onclick="setPreset('DELAYED')">Delayed</button>
+        </div>
+    </div>
+
+    <audio id="flapSound" src="OatFoundry.mp3" preload="auto"></audio>
+
+    <script>
+        const CHARACTERS = [
+            'blank', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+            'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+            'at', 'bang', 'colon', 'hashtag', 'hyphen', 'period', 'semicolon', 'slash'
+        ];
+
+        const CHAR_MAP = {
+            ' ': 'blank',
+            '@': 'at',
+            '!': 'bang',
+            ':': 'colon',
+            '#': 'hashtag',
+            '-': 'hyphen',
+            '.': 'period',
+            ';': 'semicolon',
+            '/': 'slash'
+        };
+
+        let currentFlaps = [];
+        let soundEnabled = true;
+
+        function getCharacterImage(char) {
+            const upperChar = char.toUpperCase();
+
+            if (CHAR_MAP[char]) {
+                return `${CHAR_MAP[char]}.png`;
+            }
+
+            if (upperChar >= '0' && upperChar <= '9') {
+                return `${upperChar}.png`;
+            }
+
+            if (upperChar >= 'A' && upperChar <= 'Z') {
+                return `${upperChar}.png`;
+            }
+
+            return 'blank.png';
+        }
+
+        function createFlap(character) {
+            const container = document.createElement('div');
+            container.className = 'flap-container';
+
+            const flap = document.createElement('div');
+            flap.className = 'flap';
+
+            const img = document.createElement('img');
+            img.src = getCharacterImage(character);
+            img.alt = character;
+            img.onerror = function() {
+                this.src = 'blank.png';
+            };
+
+            flap.appendChild(img);
+            container.appendChild(flap);
+
+            return container;
+        }
+
+        function playSound() {
+            if (soundEnabled) {
+                const sound = document.getElementById('flapSound');
+                sound.currentTime = 0;
+                sound.play().catch(e => console.log('Audio play failed:', e));
+            }
+        }
+
+        function displayMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.toUpperCase() || 'HELLO';
+            updateBoard(message);
+        }
+
+        function updateBoard(message) {
+            const board = document.getElementById('board');
+            const chars = message.split('');
+
+            // Play sound
+            playSound();
+
+            // Clear existing flaps
+            board.innerHTML = '';
+            currentFlaps = [];
+
+            // Create new flaps with staggered animation
+            chars.forEach((char, index) => {
+                setTimeout(() => {
+                    const flapContainer = createFlap(char);
+                    const flap = flapContainer.querySelector('.flap');
+                    flap.classList.add('flipping');
+
+                    board.appendChild(flapContainer);
+                    currentFlaps.push(flapContainer);
+
+                    setTimeout(() => {
+                        flap.classList.remove('flipping');
+                    }, 300);
+                }, index * 50);
+            });
+        }
+
+        function setPreset(message) {
+            document.getElementById('messageInput').value = message;
+            displayMessage();
+        }
+
+        // Initialize with a welcome message
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                updateBoard('WELCOME');
+            }, 500);
+        });
+
+        // Allow Enter key to submit
+        document.getElementById('messageInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                displayMessage();
+            }
+        });
+    </script>
+</body>
+</html>
