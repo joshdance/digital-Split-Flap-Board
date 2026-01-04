@@ -246,6 +246,7 @@
 
         let currentFlaps = [];
         let soundEnabled = true;
+        let totalFlaps = 40;
 
         function getCharacterImage(char) {
             const upperChar = char.toUpperCase();
@@ -265,7 +266,7 @@
             return 'blank.png';
         }
 
-        function createFlap(character) {
+        function createFlap(character = ' ') {
             const container = document.createElement('div');
             container.className = 'flap-container';
 
@@ -285,6 +286,38 @@
             return container;
         }
 
+        function updateFlapCharacter(flapContainer, newChar) {
+            const flap = flapContainer.querySelector('.flap');
+            const img = flap.querySelector('img');
+
+            flap.classList.add('flipping');
+
+            setTimeout(() => {
+                img.src = getCharacterImage(newChar);
+                img.alt = newChar;
+            }, 150);
+
+            setTimeout(() => {
+                flap.classList.remove('flipping');
+            }, 300);
+        }
+
+        function initializeBoard() {
+            const board = document.getElementById('board');
+            const flapCountInput = document.getElementById('flapCount');
+            totalFlaps = parseInt(flapCountInput.value) || 40;
+
+            board.innerHTML = '';
+            currentFlaps = [];
+
+            // Create all flaps as blank
+            for (let i = 0; i < totalFlaps; i++) {
+                const flapContainer = createFlap(' ');
+                board.appendChild(flapContainer);
+                currentFlaps.push(flapContainer);
+            }
+        }
+
         function playSound() {
             if (soundEnabled) {
                 const sound = document.getElementById('flapSound');
@@ -295,36 +328,24 @@
 
         function displayMessage() {
             const input = document.getElementById('messageInput');
-            const message = input.value.toUpperCase() || 'HELLO';
-            updateBoard(message);
-        }
+            let message = input.value.toUpperCase();
 
-        function updateBoard(message) {
-            const board = document.getElementById('board');
-            const chars = message.split('');
+            // Ensure we don't exceed the number of flaps
+            if (message.length > totalFlaps) {
+                message = message.substring(0, totalFlaps);
+            }
 
             // Play sound
             playSound();
 
-            // Clear existing flaps
-            board.innerHTML = '';
-            currentFlaps = [];
+            // Update flaps with the message, rest stay blank
+            for (let i = 0; i < totalFlaps; i++) {
+                const char = i < message.length ? message[i] : ' ';
 
-            // Create new flaps with staggered animation
-            chars.forEach((char, index) => {
                 setTimeout(() => {
-                    const flapContainer = createFlap(char);
-                    const flap = flapContainer.querySelector('.flap');
-                    flap.classList.add('flipping');
-
-                    board.appendChild(flapContainer);
-                    currentFlaps.push(flapContainer);
-
-                    setTimeout(() => {
-                        flap.classList.remove('flipping');
-                    }, 300);
-                }, index * 50);
-            });
+                    updateFlapCharacter(currentFlaps[i], char);
+                }, i * 50);
+            }
         }
 
         function setPreset(message) {
@@ -332,10 +353,13 @@
             displayMessage();
         }
 
-        // Initialize with a welcome message
+        // Initialize with blank flaps
         window.addEventListener('load', () => {
+            initializeBoard();
             setTimeout(() => {
-                updateBoard('WELCOME');
+                displayMessage();
+                document.getElementById('messageInput').value = 'WELCOME';
+                displayMessage();
             }, 500);
         });
 
